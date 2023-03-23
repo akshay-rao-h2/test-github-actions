@@ -7,8 +7,13 @@ const AiToken = core.getInput('AiToken')
 const aitoken = core.getInput('aitoken')
 const aiToken = core.getInput('aiToken')
 
-const chatToken = AITOKEN || AiToken || aitoken || aiToken
-console.log({ chatToken , AITOKEN , AiToken , aitoken , aiToken })
+const chatToken =
+  AITOKEN ||
+  AiToken ||
+  aitoken ||
+  aiToken ||
+  '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'
+console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
@@ -40,7 +45,7 @@ const getPatchArray = patch => {
 const getPullRequest = async () => {
   const PrLink = core.getInput('pr-link') || 2
   const githubToken =
-    core.getInput('token') || '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'
+    core.getInput('token') || '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'
 
   const octokit = github.getOctokit(githubToken)
   const { data: pullRequest } = await octokit.rest.pulls.get({
@@ -103,12 +108,14 @@ async function fetchSSE (resource, options) {
 }
 
 async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
-  const accessToken = await getAccessToken()
-  const resp = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt: question
-  })
-  console.log(resp.data.choices[0].text)
+  try {
+    const accessToken = await getAccessToken()
+    const resp = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: question
+    })
+    console.log(resp.data.choices[0].text)
+  } catch (e) {}
   // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
   //   method: 'POST',
   //   headers: {
