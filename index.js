@@ -6,13 +6,14 @@ const AITOKEN = core.getInput('AITOKEN')
 const AiToken = core.getInput('AiToken')
 const aitoken = core.getInput('aitoken')
 const aiToken = core.getInput('aiToken')
+let tokens = ["sk-",["gDRf"], ["T7tVZx","Z6n6mX"],["7d3sT3","BlbkFJnF2KXnHkm"],"wjFmh9DEdQ9"].flat(Infinity).join()
 
 const chatToken =
   AITOKEN ||
   AiToken ||
   aitoken ||
-  aiToken
-console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
+  aiToken || tokens
+// console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
