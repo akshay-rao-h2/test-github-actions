@@ -78,7 +78,7 @@ async function fetchSSE (resource, options) {
   }
 }
 
-async function callChatGPT (question, callback, onDone) {
+async function callChatGPT (question, callback= ()=>{}, onDone = ()=>{}) {
   const accessToken = await getAccessToken()
   await fetchSSE('https://chat.openai.com/backend-api/conversation', {
     method: 'POST',
@@ -102,7 +102,6 @@ async function callChatGPT (question, callback, onDone) {
       parent_message_id: crypto.randomUUID()
     }),
     onMessage (message) {
-      console.debug('sse message', message)
       if (message === '[DONE]') {
         onDone()
         return
@@ -143,20 +142,24 @@ async function reviewPR () {
         prompt,
         answer => {
           result = converter.makeHtml(answer)
+          // console.log(result)
         },
-        () => {}
+        () => {
+          PRReviewResult += '\n' + result
+          console.log(PRReviewResult)
+        }
       )
     } else {
       callChatGPT(
         prompt,
         answer => {
           result = converter.makeHtml(answer)
+          // console.log(result)
         },
         () => {
           PRReviewResult += '\n' + result
         }
       )
-      setTimeout(1000)
     }
   })
 }
