@@ -1,4 +1,4 @@
-const test = "name:" 
-for(let i = 0;i<10;i++){
-    console.log(test)
+const test = ["name" ,"age"]
+for(let i = 0;i<test.length){
+    console.log(test[i])
 }
