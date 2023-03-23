@@ -91,6 +91,7 @@ async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
       model: 'gpt-3.5-turbo',
       messages: [{role: 'user', content: question}]
     })
+    console.log(resp.data.choices[0].message.content)
     return resp.data.choices[0].message.content
     // callback(resp.data.choices[0].text)
   } catch (e) {}
