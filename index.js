@@ -1,14 +1,22 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const { v4: uuidv4 } = require('uuid')
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('myTotallySecretKey');
 
-const AITOKEN = core.getInput('AITOKEN')
-const AiToken = core.getInput('AiToken')
-const aitoken = core.getInput('aitoken')
-const aiToken = core.getInput('aiToken')
+const AITOKEN = core.getInput('AITOKEN') || '8ce33ef1be66bf2fd998bce00ba41258baf28ac101a3b2357ef3f134e8abdf89328425d1d46237dfd3b0ae2181736f1800bda618c4482762196b7974a6b2946dbc42f44e5b1a778d3f905b94b82ffaa42c4d9695caf029c1adb4fa625a9b4c46250d187d312c7d9fbfa505446054ce26fbee98941241174e2d5536c2be062787afe0a3dcd63a424c1f58f637af5fb7ee58e64c'
 
-const chatToken = AITOKEN || AiToken || aitoken || aiToken
-console.log({ chatToken , AITOKEN , AiToken , aitoken , aiToken })
+const commitId = core.getInput('commit-id') || '89830c298f0bfcc97ad27ec4fb004af15248b9f4'
+const repo = core.getInput('repo') || 'akshay-rao-h2/test-github-actions'
+const PrLink = core.getInput('pr-link') || 3
+
+const tokens = cryptr.decrypt(AITOKEN);
+const chatToken = tokens
+// console.log(chatToken) 
+const githubToken = core.getInput('token')  
+const octokit = github.getOctokit(githubToken)
+
+
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
@@ -37,12 +45,21 @@ const getPatchArray = patch => {
   return result
 }
 
-const getPullRequest = async () => {
-  const PrLink = core.getInput('pr-link') || 2
-  const githubToken =
-    core.getInput('token') || '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'
+const postComment = async (body = 'Great stuff!') => {
+  // console.log(`/repos/${repo}/issues/${PrLink}/comments`)
+  // return true
+  await octokit.request(`POST /repos/${repo}/issues/${PrLink}/comments`, {
+    owner: 'akshay-rao-h2',
+    repo: 'test-github-actions',
+    issue_number: PrLink,
+    body,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+}
 
-  const octokit = github.getOctokit(githubToken)
+const getPullRequest = async () => {
   const { data: pullRequest } = await octokit.rest.pulls.get({
     owner: 'akshay-rao-h2',
     repo: 'test-github-actions',
@@ -54,143 +71,56 @@ const getPullRequest = async () => {
   return getPatchArray(pullRequest)
 }
 
-const getAccessToken = async () => {
-  return chatToken
-}
-
-async function* streamAsyncIterable (stream) {
-  const reader = stream.getReader()
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) {
-        return
-      }
-      yield value
-    }
-  } finally {
-    reader.releaseLock()
-  }
-}
-
-async function fetchSSE (resource, options) {
-  try {
-    const { onMessage, ...fetchOptions } = options
-    // console.log({ fetchOptions })
-
-    console.log(JSON.stringify({ data: resp }))
-    // if (resp.status > 399) {
-    //   console.log(resp)
-    //   resp
-    //     .json()
-    //     .then(r => {
-    //       inProgress(false, true)
-    //       // onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
-    //     })
-    //     .catch(e => {})
-    //   return
-    // }
-    // const parser = createParser(event => {
-    //   if (event.type === 'event') {
-    //     onMessage(event.data)
-    //   }
-    // })
-    // for await (const chunk of streamAsyncIterable(resp.body)) {
-    //   const str = new TextDecoder().decode(chunk)
-    //   parser.feed(str)
-    // }
-  } catch (e) {}
-}
 
 async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
-  const accessToken = await getAccessToken()
-  const resp = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt: question
-  })
-  console.log(resp.data.choices[0].text)
-  // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${accessToken}`
-  //   },
-  //   body: JSON.stringify({
-  //     action: 'next',
-  //     messages: [
-  //       {
-  //         id: uuidv4(),
-  //         role: 'user',
-  //         content: {
-  //           content_type: 'text',
-  //           parts: []
-  //         }
-  //       }
-  //     ],
-  //     model: 'text-davinci-002-render',
-  //     parent_message_id: uuidv4()
-  //   }),
-  //   onMessage (message) {
-  //     if (message === '[DONE]') {
-  //       onDone()
-  //       return
-  //     }
-  //     const data = JSON.parse(message)
-  //     const text = data.message?.content?.parts?.[0]
-  //     if (text) {
-  //       callback(text)
-  //     }
-  //   }
-  // })
+  try {
+    const resp = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: [{role: 'user', content: question}]
+    })
+    console.log(JSON.stringify(resp.data.choices[0].message))
+    return resp.data.choices[0].message.content[0].message
+    // callback(resp.data.choices[0].text)
+  } catch (e) {
+    console.log({e})
+  }
 }
+let PRReviewResult = ''
 
+const getComments = async patchItem => {
+  let prompt = `
+  Act as a code reviewer of a Pull Request, providing feedback on the code changes below. The code is in form of chunks please keep the context of previous chunk in mind.
+  You are provided with the Pull Request changes in a patch format.
+  Each patch entry has the commit message in the Subject line followed by the code changes (diffs) in a unidiff format.
+  \n\n
+  Patch of the Pull Request to review:
+  \n
+  ${patchItem}
+  \n\n
+  
+  As a code reviewer, your task is:
+  - Review the code changes (diffs) in the patch and provide feedback.
+  - If there are any bugs, highlight them.
+  - Do not highlight minor issues and nitpicks.
+  - Limit comments to 1 point maximum and please answer in atmax 25 words.
+  - do not add unnecessary new lines.
+  - please give only issues that you see.
+  - return in markup language for github`
+
+  const result = await callChatGPT(prompt)
+  PRReviewResult += '\n' + result
+  return PRReviewResult
+}
 async function reviewPR () {
   const patchArray = await getPullRequest()
-  let PRReviewResult = ''
   let result = ''
-  patchArray.forEach((item, index) => {
-    let prompt = `
-    Act as a code reviewer of a Pull Request, providing feedback on the code changes below. The code is in form of chunks please keep the context of previous chunk in mind.
-    You are provided with the Pull Request changes in a patch format.
-    Each patch entry has the commit message in the Subject line followed by the code changes (diffs) in a unidiff format.
-    \n\n
-    Patch of the Pull Request to review:
-    \n
-    ${item}
-    \n\n
-    
-    As a code reviewer, your task is:
-    - Review the code changes (diffs) in the patch and provide feedback.
-    - If there are any bugs, highlight them.
-    - Does the code do what it says in the commit messages?
-    - Do not highlight minor issues and nitpicks.
-    - Use bullet points if you have multiple comments.
-    - Limit comments to 3 per chunk`
-    if (index === patchArray.length - 1) {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-          // console.log(PRReviewResult)
-        }
-      )
-    } else {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-        }
-      )
-    }
-  })
+  for (let i = 0; i < patchArray.length; i++) {
+    console.log(patchArray[i])
+    await getComments(patchArray[i])
+  }
+  console.log(PRReviewResult)
+
+  postComment(PRReviewResult)
 }
 
 reviewPR()
