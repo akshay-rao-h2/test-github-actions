@@ -2,10 +2,16 @@ const core = require('@actions/core')
 const github = require('@actions/github')
 const { v4: uuidv4 } = require('uuid')
 const fetch = require('node-fetch')
+const chatToken = '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'
+
+const { Configuration, OpenAIApi } = require('openai')
+
+const configuration = new Configuration({
+  apiKey: chatToken
+})
+const openai = new OpenAIApi(configuration)
 
 // const fetch = require('node-fetch');
-const chatToken =
-  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJyYWh1bC4xMjIyOTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXItOGYxZmxOWmNIOWQ5dDBNU3FGSEhVbDN1In0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNzc1NTY4NTE3Mzc5NDYxNDQ1MiIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkub3BlbmFpLmF1dGgwYXBwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE2Nzk1NzgwMDEsImV4cCI6MTY4MDc4NzYwMSwiYXpwIjoiVGRKSWNiZTE2V29USHROOTVueXl3aDVFNHlPbzZJdEciLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIG1vZGVsLnJlYWQgbW9kZWwucmVxdWVzdCBvcmdhbml6YXRpb24ucmVhZCBvZmZsaW5lX2FjY2VzcyJ9.oNHKkRg-TRTvxTo4sLY0pKhOB745umCs3LtvHAFrjgL4iwtNVl4qz1Kvfjn8Hxpu95cJK_5Kxk0CD03-iG5DV10UTIU6w1fHi-iW4E9RvAN2Au5KZ-GwvSHLDbn4prz9xlvzYa8BEE1N00MIyFc_KI3I9JK5CyMdOcTuWu9-LGClL33wR-624Q1xfPhvw10G50jFMhaw3PGUTkDaScTdQDFFmM_Ia25DtmPovB25m1qUvGSNu1EIycQsKv-tXLF2avtvP9533001RYi6gjBFKojyyFMKtZdsWaLJ_nxGhs2BBWWan_KSwfjmZaS-pnLIAfrrHOWVKaUSWHsXzPXP5g'
 
 const getPatchArray = patch => {
   let smallPatch = patch.split('\n')
@@ -27,9 +33,10 @@ const getPatchArray = patch => {
 }
 
 const getPullRequest = async () => {
-  const PrLink = core.getInput('pr-link')
-  const githubToken = core.getInput('token')
-  console.log({PrLink, githubToken})
+  const PrLink = core.getInput('pr-link') || 2
+  const githubToken =
+    core.getInput('token') || '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'
+
   const octokit = github.getOctokit(githubToken)
   const { data: pullRequest } = await octokit.rest.pulls.get({
     owner: 'akshay-rao-h2',
@@ -62,62 +69,74 @@ async function* streamAsyncIterable (stream) {
 }
 
 async function fetchSSE (resource, options) {
-  const { onMessage, ...fetchOptions } = options
-  // console.log({ fetchOptions })
-  const resp = await fetch(resource, fetchOptions)
-  if (resp.status > 399) {
-    resp.json().then(r => {
-      inProgress(false, true)
-      onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
-    })
-    return
-  }
-  const parser = createParser(event => {
-    if (event.type === 'event') {
-      onMessage(event.data)
-    }
-  })
-  for await (const chunk of streamAsyncIterable(resp.body)) {
-    const str = new TextDecoder().decode(chunk)
-    parser.feed(str)
-  }
+  try {
+    const { onMessage, ...fetchOptions } = options
+    // console.log({ fetchOptions })
+  
+    console.log(JSON.stringify({ data: resp }))
+    // if (resp.status > 399) {
+    //   console.log(resp)
+    //   resp
+    //     .json()
+    //     .then(r => {
+    //       inProgress(false, true)
+    //       // onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
+    //     })
+    //     .catch(e => {})
+    //   return
+    // }
+    // const parser = createParser(event => {
+    //   if (event.type === 'event') {
+    //     onMessage(event.data)
+    //   }
+    // })
+    // for await (const chunk of streamAsyncIterable(resp.body)) {
+    //   const str = new TextDecoder().decode(chunk)
+    //   parser.feed(str)
+    // }
+  } catch (e) {}
 }
 
 async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   const accessToken = await getAccessToken()
-  await fetchSSE('https://chat.openai.com/backend-api/conversation', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    },
-    body: JSON.stringify({
-      action: 'next',
-      messages: [
-        {
-          id: uuidv4(),
-          role: 'user',
-          content: {
-            content_type: 'text',
-            parts: [question]
-          }
-        }
-      ],
-      model: 'text-davinci-002-render',
-      parent_message_id: uuidv4()
-    }),
-    onMessage (message) {
-      if (message === '[DONE]') {
-        onDone()
-        return
-      }
-      const data = JSON.parse(message)
-      const text = data.message?.content?.parts?.[0]
-      if (text) {
-        callback(text)
-      }
-    }
+  const resp = await openai.createCompletion({
+    model: "text-davinci-003",
+    prompt: question
   })
+  console.log(resp.data.choices[0].text);
+  // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     Authorization: `Bearer ${accessToken}`
+  //   },
+  //   body: JSON.stringify({
+  //     action: 'next',
+  //     messages: [
+  //       {
+  //         id: uuidv4(),
+  //         role: 'user',
+  //         content: {
+  //           content_type: 'text',
+  //           parts: []
+  //         }
+  //       }
+  //     ],
+  //     model: 'text-davinci-002-render',
+  //     parent_message_id: uuidv4()
+  //   }),
+  //   onMessage (message) {
+  //     if (message === '[DONE]') {
+  //       onDone()
+  //       return
+  //     }
+  //     const data = JSON.parse(message)
+  //     const text = data.message?.content?.parts?.[0]
+  //     if (text) {
+  //       callback(text)
+  //     }
+  //   }
+  // })
 }
 
 async function reviewPR () {
