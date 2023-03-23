@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
-        uses: akshay-rao-h2/test-github-actions@v1.17
+        uses: akshay-rao-h2/test-github-actions@v1.18
         with:
           who-to-greet: 'Mona the Octocat12'
           pr-link: ${{ github.event.number }}
