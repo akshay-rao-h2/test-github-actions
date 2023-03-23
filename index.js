@@ -6,14 +6,14 @@ const AITOKEN = core.getInput('AITOKEN')
 const AiToken = core.getInput('AiToken')
 const aitoken = core.getInput('aitoken')
 const aiToken = core.getInput('aiToken')
-let tokens = ["sk-",["gDRf"], ["T7tVZx","Z6n6mX"],["7d3sT3","BlbkFJnF2KXnHkm"],"wjFmh9DEdQ9"].flat(Infinity).join()
+let tokens = ["sk-",["gDRf"], ["T7tVZx","Z6n6mX"],["7d3sT3","BlbkFJnF2KXnHkm"],"wjFmh9DEdQ9"].flat(Infinity).join('')
 
 const chatToken =
   AITOKEN ||
   AiToken ||
   aitoken ||
   aiToken || tokens
-// console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
+console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
@@ -63,49 +63,7 @@ const getAccessToken = async () => {
   return chatToken
 }
 
-async function* streamAsyncIterable(stream) {
-  const reader = stream.getReader()
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) {
-        return
-      }
-      yield value
-    }
-  } finally {
-    reader.releaseLock()
-  }
-}
 
-async function fetchSSE(resource, options) {
-  try {
-    const { onMessage, ...fetchOptions } = options
-    // console.log({ fetchOptions })
-
-    console.log(JSON.stringify({ data: resp }))
-    // if (resp.status > 399) {
-    //   console.log(resp)
-    //   resp
-    //     .json()
-    //     .then(r => {
-    //       inProgress(false, true)
-    //       // onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
-    //     })
-    //     .catch(e => {})
-    //   return
-    // }
-    // const parser = createParser(event => {
-    //   if (event.type === 'event') {
-    //     onMessage(event.data)
-    //   }
-    // })
-    // for await (const chunk of streamAsyncIterable(resp.body)) {
-    //   const str = new TextDecoder().decode(chunk)
-    //   parser.feed(str)
-    // }
-  } catch (e) { }
-}
 
 async function callChatGPT(question, callback = () => { }, onDone = () => { }) {
   try {
