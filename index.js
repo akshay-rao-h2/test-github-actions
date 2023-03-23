@@ -1,5 +1,7 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
+const { v4 : uuidv4}  = require('uuid');
+
 // const fetch = require('node-fetch');
 const chatToken =
   'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJyYWh1bC4xMjIyOTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXItOGYxZmxOWmNIOWQ5dDBNU3FGSEhVbDN1In0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNzc1NTY4NTE3Mzc5NDYxNDQ1MiIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkub3BlbmFpLmF1dGgwYXBwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE2Nzk1NzgwMDEsImV4cCI6MTY4MDc4NzYwMSwiYXpwIjoiVGRKSWNiZTE2V29USHROOTVueXl3aDVFNHlPbzZJdEciLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIG1vZGVsLnJlYWQgbW9kZWwucmVxdWVzdCBvcmdhbml6YXRpb24ucmVhZCBvZmZsaW5lX2FjY2VzcyJ9.oNHKkRg-TRTvxTo4sLY0pKhOB745umCs3LtvHAFrjgL4iwtNVl4qz1Kvfjn8Hxpu95cJK_5Kxk0CD03-iG5DV10UTIU6w1fHi-iW4E9RvAN2Au5KZ-GwvSHLDbn4prz9xlvzYa8BEE1N00MIyFc_KI3I9JK5CyMdOcTuWu9-LGClL33wR-624Q1xfPhvw10G50jFMhaw3PGUTkDaScTdQDFFmM_Ia25DtmPovB25m1qUvGSNu1EIycQsKv-tXLF2avtvP9533001RYi6gjBFKojyyFMKtZdsWaLJ_nxGhs2BBWWan_KSwfjmZaS-pnLIAfrrHOWVKaUSWHsXzPXP5g'
@@ -90,7 +92,7 @@ async function callChatGPT (question, callback= ()=>{}, onDone = ()=>{}) {
       action: 'next',
       messages: [
         {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           role: 'user',
           content: {
             content_type: 'text',
@@ -99,7 +101,7 @@ async function callChatGPT (question, callback= ()=>{}, onDone = ()=>{}) {
         }
       ],
       model: 'text-davinci-002-render',
-      parent_message_id: crypto.randomUUID()
+      parent_message_id: uuidv4()
     }),
     onMessage (message) {
       if (message === '[DONE]') {
