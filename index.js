@@ -9,8 +9,21 @@ try {
   const time = (new Date()).toTimeString();
   core.setOutput("time", time);
   // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
+//   const payload = JSON.stringify(github.context.payload, undefined, 2)
+//   console.log(`The event payload: ${payload}`);
+
+  const octokit = github.getOctokit(githubToken)
+
+  const { data: pullRequest } = await octokit.rest.pulls.get({
+      owner: 'akshay-rao-h2',
+      repo: 'test-github-actions',
+      pull_number: PrLink,
+      mediaType: {
+        format: 'diff'
+      }
+  });
+  console.log('pullRequest is as', pullRequest)
+
 } catch (error) {
   core.setFailed(error.message);
 }
