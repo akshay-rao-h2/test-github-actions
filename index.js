@@ -3,22 +3,22 @@ const github = require('@actions/github')
 const { v4: uuidv4 } = require('uuid')
 const Cryptr = require('cryptr');
 const cryptr = new Cryptr('myTotallySecretKey');
+// console.log(cryptr.encrypt('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'))
 
 
-
-
-const AITOKEN = core.getInput('AITOKEN')
+const AITOKEN = core.getInput('AITOKEN') || '4c9f4c19aad680e80a27a665733a053b1a81324808fef83019b54eab5911f10634150143834830d1107d46293d6affd0d879e697f7e1227622b2b18a3904c8d8b800df7843de118483e5bcfab973b2572b1f2859c6bf6de45a6ade456b9f308734796925c3c3b2246f56e6658d0f034852930310df3f5cdb21982c825e1a346fe7d80a2f0a62e7c018b353e72f4e2b2e5c8536'
 
 const commitId = core.getInput('commit-id') || '89830c298f0bfcc97ad27ec4fb004af15248b9f4'
 const repo = core.getInput('repo') || 'akshay-rao-h2/test-github-actions'
 const PrLink = core.getInput('pr-link') || 3
 
+const tokens = cryptr.decrypt(AITOKEN);
+const chatToken = tokens
+// console.log(chatToken)
 const githubToken = core.getInput('token') 
 const octokit = github.getOctokit(githubToken)
 
-const tokens = cryptr.decrypt(AITOKEN);
 
-const chatToken = tokens
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
