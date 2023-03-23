@@ -1,128 +1,123 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
+const core = require('@actions/core')
+const github = require('@actions/github')
 // const fetch = require('node-fetch');
-const chatToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJyYWh1bC4xMjIyOTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXItOGYxZmxOWmNIOWQ5dDBNU3FGSEhVbDN1In0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNzc1NTY4NTE3Mzc5NDYxNDQ1MiIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkub3BlbmFpLmF1dGgwYXBwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE2Nzk1NzgwMDEsImV4cCI6MTY4MDc4NzYwMSwiYXpwIjoiVGRKSWNiZTE2V29USHROOTVueXl3aDVFNHlPbzZJdEciLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIG1vZGVsLnJlYWQgbW9kZWwucmVxdWVzdCBvcmdhbml6YXRpb24ucmVhZCBvZmZsaW5lX2FjY2VzcyJ9.oNHKkRg-TRTvxTo4sLY0pKhOB745umCs3LtvHAFrjgL4iwtNVl4qz1Kvfjn8Hxpu95cJK_5Kxk0CD03-iG5DV10UTIU6w1fHi-iW4E9RvAN2Au5KZ-GwvSHLDbn4prz9xlvzYa8BEE1N00MIyFc_KI3I9JK5CyMdOcTuWu9-LGClL33wR-624Q1xfPhvw10G50jFMhaw3PGUTkDaScTdQDFFmM_Ia25DtmPovB25m1qUvGSNu1EIycQsKv-tXLF2avtvP9533001RYi6gjBFKojyyFMKtZdsWaLJ_nxGhs2BBWWan_KSwfjmZaS-pnLIAfrrHOWVKaUSWHsXzPXP5g'
+const chatToken =
+  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJyYWh1bC4xMjIyOTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXItOGYxZmxOWmNIOWQ5dDBNU3FGSEhVbDN1In0sImlzcyI6Imh0dHBzOi8vYXV0aDAub3BlbmFpLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNzc1NTY4NTE3Mzc5NDYxNDQ1MiIsImF1ZCI6WyJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxIiwiaHR0cHM6Ly9vcGVuYWkub3BlbmFpLmF1dGgwYXBwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE2Nzk1NzgwMDEsImV4cCI6MTY4MDc4NzYwMSwiYXpwIjoiVGRKSWNiZTE2V29USHROOTVueXl3aDVFNHlPbzZJdEciLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIG1vZGVsLnJlYWQgbW9kZWwucmVxdWVzdCBvcmdhbml6YXRpb24ucmVhZCBvZmZsaW5lX2FjY2VzcyJ9.oNHKkRg-TRTvxTo4sLY0pKhOB745umCs3LtvHAFrjgL4iwtNVl4qz1Kvfjn8Hxpu95cJK_5Kxk0CD03-iG5DV10UTIU6w1fHi-iW4E9RvAN2Au5KZ-GwvSHLDbn4prz9xlvzYa8BEE1N00MIyFc_KI3I9JK5CyMdOcTuWu9-LGClL33wR-624Q1xfPhvw10G50jFMhaw3PGUTkDaScTdQDFFmM_Ia25DtmPovB25m1qUvGSNu1EIycQsKv-tXLF2avtvP9533001RYi6gjBFKojyyFMKtZdsWaLJ_nxGhs2BBWWan_KSwfjmZaS-pnLIAfrrHOWVKaUSWHsXzPXP5g'
 
 const getPatchArray = patch => {
-  let smallPatch = patch.split("\n");
-  let result = [];
-  let counter = 0;
-  let currentString = "";
+  let smallPatch = patch.split('\n')
+  let result = []
+  let counter = 0
+  let currentString = ''
   for (let i = 0; i < smallPatch.length; i++) {
     if (counter + smallPatch[i].length + 1 <= 400) {
-      currentString += smallPatch[i] + " ";
-      counter += smallPatch[i].length + 1;
+      currentString += smallPatch[i] + ' '
+      counter += smallPatch[i].length + 1
     } else {
-      result.push(currentString);
-      currentString = smallPatch[i] + " ";
-      counter = smallPatch[i].length + 1;
+      result.push(currentString)
+      currentString = smallPatch[i] + ' '
+      counter = smallPatch[i].length + 1
     }
   }
-  result.push(currentString);
+  result.push(currentString)
   return result
 }
 
-
-const getPullRequest =async ()=>{
-  const PrLink = core.getInput('pr-link');
-  const githubToken = core.getInput('token');
+const getPullRequest = async () => {
+  const PrLink = core.getInput('pr-link')
+  const githubToken = core.getInput('token')
   const octokit = github.getOctokit(githubToken)
-  const pullRequest = await octokit.rest.pulls.get({
-      owner: 'akshay-rao-h2',
-      repo: 'test-github-actions',
-      pull_number: PrLink,
-      mediaType: {
-        format: 'diff'
-      }
-  });
-  return getPatchArray(pullRequest);
+  const { data: pullRequest } = await octokit.rest.pulls.get({
+    owner: 'akshay-rao-h2',
+    repo: 'test-github-actions',
+    pull_number: PrLink,
+    mediaType: {
+      format: 'diff'
+    }
+  })
+  return getPatchArray(pullRequest)
 }
 
-const getAccessToken =  async () => {
+const getAccessToken = async () => {
   return chatToken
 }
 
-
-async function* streamAsyncIterable(stream) {
-  const reader = stream.getReader();
+async function* streamAsyncIterable (stream) {
+  const reader = stream.getReader()
   try {
     while (true) {
-      const { done, value } = await reader.read();
+      const { done, value } = await reader.read()
       if (done) {
-        return;
+        return
       }
-      yield value;
+      yield value
     }
   } finally {
-    reader.releaseLock();
+    reader.releaseLock()
   }
 }
 
-
-async function fetchSSE(resource, options) {
-  const { onMessage, ...fetchOptions } = options;
-  const resp = await fetch(resource, fetchOptions);
+async function fetchSSE (resource, options) {
+  const { onMessage, ...fetchOptions } = options
+  const resp = await fetch(resource, fetchOptions)
   if (resp.status > 399) {
-    resp.json().then((r) => {
+    resp.json().then(r => {
       inProgress(false, true)
-      onMessage(
-        JSON.stringify({ 'message': { 'content': { 'parts': [r.detail] } } }));
+      onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
     })
     return
   }
-  const parser = createParser((event) => {
-    if (event.type === "event") {
-      onMessage(event.data);
+  const parser = createParser(event => {
+    if (event.type === 'event') {
+      onMessage(event.data)
     }
-  });
+  })
   for await (const chunk of streamAsyncIterable(resp.body)) {
-    const str = new TextDecoder().decode(chunk);
-    parser.feed(str);
+    const str = new TextDecoder().decode(chunk)
+    parser.feed(str)
   }
 }
 
-
-
-async function callChatGPT(question, callback, onDone) {
-  const accessToken = await getAccessToken();
-  await fetchSSE("https://chat.openai.com/backend-api/conversation", {
-    method: "POST",
+async function callChatGPT (question, callback, onDone) {
+  const accessToken = await getAccessToken()
+  await fetchSSE('https://chat.openai.com/backend-api/conversation', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`
     },
     body: JSON.stringify({
-      action: "next",
+      action: 'next',
       messages: [
         {
           id: crypto.randomUUID(),
-          role: "user",
+          role: 'user',
           content: {
-            content_type: "text",
-            parts: [question],
-          },
-        },
+            content_type: 'text',
+            parts: [question]
+          }
+        }
       ],
-      model: "text-davinci-002-render",
-      parent_message_id: crypto.randomUUID(),
+      model: 'text-davinci-002-render',
+      parent_message_id: crypto.randomUUID()
     }),
-    onMessage(message) {
-      console.debug("sse message", message);
-      if (message === "[DONE]") {
-        onDone();
-        return;
+    onMessage (message) {
+      console.debug('sse message', message)
+      if (message === '[DONE]') {
+        onDone()
+        return
       }
-      const data = JSON.parse(message);
-      const text = data.message?.content?.parts?.[0];
+      const data = JSON.parse(message)
+      const text = data.message?.content?.parts?.[0]
       if (text) {
-        callback(text);
+        callback(text)
       }
     }
-  });
+  })
 }
 
-async function reviewPR() {
-  const patchArray = await getPullRequest();
+async function reviewPR () {
+  const patchArray = await getPullRequest()
   let PRReviewResult = ''
   let result = ''
   patchArray.forEach((item, index) => {
@@ -146,17 +141,15 @@ async function reviewPR() {
     if (index === patchArray.length - 1) {
       callChatGPT(
         prompt,
-        (answer) => {
+        answer => {
           result = converter.makeHtml(answer)
         },
-        () => {
-          
-        }
+        () => {}
       )
     } else {
       callChatGPT(
         prompt,
-        (answer) => {
+        answer => {
           result = converter.makeHtml(answer)
         },
         () => {
