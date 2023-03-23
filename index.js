@@ -54,8 +54,8 @@ const getPatchArray = patch => {
 }
 
 const postComment = async (body = 'Great stuff!') => {
-  console.log(`/repos/${repo}/issues/${PrLink}/comments`)
-  return true
+  // console.log(`/repos/${repo}/issues/${PrLink}/comments`)
+  // return true
   await octokit.request(`POST /repos/${repo}/issues/${PrLink}/comments`, {
     owner: 'akshay-rao-h2',
     repo: 'test-github-actions',
@@ -79,56 +79,19 @@ const getPullRequest = async () => {
   return getPatchArray(pullRequest)
 }
 
-const getAccessToken = async () => {
-  return chatToken
-}
 
 async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   try {
-    const accessToken = await getAccessToken()
     const resp = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [{role: 'user', content: question}]
     })
     console.log(JSON.stringify(resp.data.choices[0].message))
-    return resp.data.choices[0].message.content
+    return resp.data.choices[0].message.content[0].message
     // callback(resp.data.choices[0].text)
   } catch (e) {
     console.log({e})
   }
-  // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${accessToken}`
-  //   },
-  //   body: JSON.stringify({
-  //     action: 'next',
-  //     messages: [
-  //       {
-  //         id: uuidv4(),
-  //         role: 'user',
-  //         content: {
-  //           content_type: 'text',
-  //           parts: []
-  //         }
-  //       }
-  //     ],
-  //     model: 'text-davinci-002-render',
-  //     parent_message_id: uuidv4()
-  //   }),
-  //   onMessage (message) {
-  //     if (message === '[DONE]') {
-  //       onDone()
-  //       return
-  //     }
-  //     const data = JSON.parse(message)
-  //     const text = data.message?.content?.parts?.[0]
-  //     if (text) {
-  //       callback(text)
-  //     }
-  //   }
-  // })
 }
 let PRReviewResult = ''
 
