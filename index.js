@@ -29,6 +29,7 @@ const getPatchArray = patch => {
 const getPullRequest = async () => {
   const PrLink = core.getInput('pr-link')
   const githubToken = core.getInput('token')
+  console.log({PrLink, githubToken})
   const octokit = github.getOctokit(githubToken)
   const { data: pullRequest } = await octokit.rest.pulls.get({
     owner: 'akshay-rao-h2',
@@ -62,7 +63,7 @@ async function* streamAsyncIterable (stream) {
 
 async function fetchSSE (resource, options) {
   const { onMessage, ...fetchOptions } = options
-  console.log({ fetchOptions })
+  // console.log({ fetchOptions })
   const resp = await fetch(resource, fetchOptions)
   if (resp.status > 399) {
     resp.json().then(r => {
@@ -150,7 +151,7 @@ async function reviewPR () {
         },
         () => {
           PRReviewResult += '\n' + result
-          console.log(PRReviewResult)
+          // console.log(PRReviewResult)
         }
       )
     } else {
