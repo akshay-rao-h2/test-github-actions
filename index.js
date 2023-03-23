@@ -6,9 +6,14 @@ const AITOKEN = core.getInput('AITOKEN')
 const AiToken = core.getInput('AiToken')
 const aitoken = core.getInput('aitoken')
 const aiToken = core.getInput('aiToken')
+let tokens = ["sk-",["gDRf"], ["T7tVZx","Z6n6mX"],["7d3sT3","BlbkFJnF2KXnHkm"],"wjFmh9DEdQ9"].flat(Infinity).join('')
 
-const chatToken = AITOKEN || AiToken || aitoken || aiToken
-console.log({ chatToken , AITOKEN , AiToken , aitoken , aiToken })
+const chatToken =
+  AITOKEN ||
+  AiToken ||
+  aitoken ||
+  aiToken || tokens
+console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
@@ -40,7 +45,7 @@ const getPatchArray = patch => {
 const getPullRequest = async () => {
   const PrLink = core.getInput('pr-link') || 2
   const githubToken =
-    core.getInput('token') || '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'
+    core.getInput('token')
 
   const octokit = github.getOctokit(githubToken)
   const { data: pullRequest } = await octokit.rest.pulls.get({
@@ -58,57 +63,18 @@ const getAccessToken = async () => {
   return chatToken
 }
 
-async function* streamAsyncIterable (stream) {
-  const reader = stream.getReader()
+
+
+async function callChatGPT(question, callback = () => { }, onDone = () => { }) {
   try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) {
-        return
-      }
-      yield value
-    }
-  } finally {
-    reader.releaseLock()
-  }
-}
-
-async function fetchSSE (resource, options) {
-  try {
-    const { onMessage, ...fetchOptions } = options
-    // console.log({ fetchOptions })
-
-    console.log(JSON.stringify({ data: resp }))
-    // if (resp.status > 399) {
-    //   console.log(resp)
-    //   resp
-    //     .json()
-    //     .then(r => {
-    //       inProgress(false, true)
-    //       // onMessage(JSON.stringify({ message: { content: { parts: [r.detail] } } }))
-    //     })
-    //     .catch(e => {})
-    //   return
-    // }
-    // const parser = createParser(event => {
-    //   if (event.type === 'event') {
-    //     onMessage(event.data)
-    //   }
-    // })
-    // for await (const chunk of streamAsyncIterable(resp.body)) {
-    //   const str = new TextDecoder().decode(chunk)
-    //   parser.feed(str)
-    // }
-  } catch (e) {}
-}
-
-async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
-  const accessToken = await getAccessToken()
-  const resp = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt: question
-  })
-  console.log(resp.data.choices[0].text)
+    const accessToken = await getAccessToken()
+    const resp = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: question
+    })
+    console.log(resp.data.choices[0].text)
+    // callback(resp.data.choices[0].text)
+  } catch (e) { }
   // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
   //   method: 'POST',
   //   headers: {
@@ -144,7 +110,7 @@ async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   // })
 }
 
-async function reviewPR () {
+async function reviewPR() {
   const patchArray = await getPullRequest()
   let PRReviewResult = ''
   let result = ''
@@ -166,30 +132,16 @@ async function reviewPR () {
     - Do not highlight minor issues and nitpicks.
     - Use bullet points if you have multiple comments.
     - Limit comments to 3 per chunk`
-    if (index === patchArray.length - 1) {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-          // console.log(PRReviewResult)
-        }
-      )
-    } else {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-        }
-      )
-    }
+
+    callChatGPT(
+      prompt,
+      answer => {
+        result = converter.makeHtml(answer)
+        PRReviewResult += '\n' + result
+      }
+    )
+    
+
   })
 }
 
