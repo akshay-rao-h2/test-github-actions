@@ -2,14 +2,12 @@ on: [pull_request]
 
 jobs:
   hello_world_job:
-    env:
-      JAVA_VERSION: '11'
     runs-on: ubuntu-latest
     name: A job to say hello
     steps:
       - name: Hello world action step
         id: hello
-        uses: akshay-rao-h2/test-github-actions@v1.13
+        uses: akshay-rao-h2/test-github-actions@v1.14
         with:
           who-to-greet: 'Mona the Octocat12'
           pr-link: ${{ github.event.number }}

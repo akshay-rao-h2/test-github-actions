@@ -1,8 +1,8 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const { v4: uuidv4 } = require('uuid')
-const fetch = require('node-fetch')
-const chatToken = core.getInput('aiToken')
+
+const chatToken = core.getInput('AITOKEN') || core.getInput('AiToken') || core.getInput('aitoken')
 
 const { Configuration, OpenAIApi } = require('openai')
 
