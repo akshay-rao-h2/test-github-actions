@@ -11,8 +11,7 @@ const chatToken =
   AITOKEN ||
   AiToken ||
   aitoken ||
-  aiToken ||
-  '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'
+  aiToken
 console.log({ chatToken, AITOKEN, AiToken, aitoken, aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
@@ -45,7 +44,7 @@ const getPatchArray = patch => {
 const getPullRequest = async () => {
   const PrLink = core.getInput('pr-link') || 2
   const githubToken =
-    core.getInput('token') || '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'
+    core.getInput('token')
 
   const octokit = github.getOctokit(githubToken)
   const { data: pullRequest } = await octokit.rest.pulls.get({
@@ -63,7 +62,7 @@ const getAccessToken = async () => {
   return chatToken
 }
 
-async function* streamAsyncIterable (stream) {
+async function* streamAsyncIterable(stream) {
   const reader = stream.getReader()
   try {
     while (true) {
@@ -78,7 +77,7 @@ async function* streamAsyncIterable (stream) {
   }
 }
 
-async function fetchSSE (resource, options) {
+async function fetchSSE(resource, options) {
   try {
     const { onMessage, ...fetchOptions } = options
     // console.log({ fetchOptions })
@@ -104,10 +103,10 @@ async function fetchSSE (resource, options) {
     //   const str = new TextDecoder().decode(chunk)
     //   parser.feed(str)
     // }
-  } catch (e) {}
+  } catch (e) { }
 }
 
-async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
+async function callChatGPT(question, callback = () => { }, onDone = () => { }) {
   try {
     const accessToken = await getAccessToken()
     const resp = await openai.createCompletion({
@@ -115,7 +114,8 @@ async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
       prompt: question
     })
     console.log(resp.data.choices[0].text)
-  } catch (e) {}
+    // callback(resp.data.choices[0].text)
+  } catch (e) { }
   // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
   //   method: 'POST',
   //   headers: {
@@ -151,7 +151,7 @@ async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   // })
 }
 
-async function reviewPR () {
+async function reviewPR() {
   const patchArray = await getPullRequest()
   let PRReviewResult = ''
   let result = ''
@@ -173,30 +173,16 @@ async function reviewPR () {
     - Do not highlight minor issues and nitpicks.
     - Use bullet points if you have multiple comments.
     - Limit comments to 3 per chunk`
-    if (index === patchArray.length - 1) {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-          // console.log(PRReviewResult)
-        }
-      )
-    } else {
-      callChatGPT(
-        prompt,
-        answer => {
-          result = converter.makeHtml(answer)
-          // console.log(result)
-        },
-        () => {
-          PRReviewResult += '\n' + result
-        }
-      )
-    }
+
+    callChatGPT(
+      prompt,
+      answer => {
+        result = converter.makeHtml(answer)
+        PRReviewResult += '\n' + result
+      }
+    )
+    
+
   })
 }
 
