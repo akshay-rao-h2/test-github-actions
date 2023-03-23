@@ -7,20 +7,18 @@ const AiToken = core.getInput('AiToken')
 const aitoken = core.getInput('aitoken')
 const aiToken = core.getInput('aiToken')
 
-const commitId = core.getInput('commit-id') || '62363c6a0349b5daa7ad73618cfe5492b7dd4b45'
+const commitId = core.getInput('commit-id') || '89830c298f0bfcc97ad27ec4fb004af15248b9f4'
 const repo = core.getInput('repo') || 'akshay-rao-h2/test-github-actions'
 const PrLink = core.getInput('pr-link') || 3
 
-const githubToken =
-  core.getInput('token') || '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'
+const githubToken = core.getInput('token') 
 const octokit = github.getOctokit(githubToken)
 
 let tokens = [
-  'sk-',
-  ['gDRf'],
-  ['T7tVZx', 'Z6n6mX'],
-  ['7d3sT3', 'BlbkFJnF2KXnHkm'],
-  'wjFmh9DEdQ9'
+  "sk-",
+  ["mPw2LHa","Hza8Xaqq"],
+  "fyr7wT3BlbkFJ",
+  "UCP9LkiW4PSpmzsyAW5g"
 ]
   .flat(Infinity)
   .join('')
@@ -57,6 +55,7 @@ const getPatchArray = patch => {
 
 const postComment = async (body = 'Great stuff!') => {
   console.log(`/repos/${repo}/issues/${PrLink}/comments`)
+  return true
   await octokit.request(`POST /repos/${repo}/issues/${PrLink}/comments`, {
     owner: 'akshay-rao-h2',
     repo: 'test-github-actions',
@@ -91,10 +90,12 @@ async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
       model: 'gpt-3.5-turbo',
       messages: [{role: 'user', content: question}]
     })
-    console.log(resp.data.choices[0].message.content)
+    console.log(JSON.stringify(resp.data.choices[0].message))
     return resp.data.choices[0].message.content
     // callback(resp.data.choices[0].text)
-  } catch (e) {}
+  } catch (e) {
+    console.log({e})
+  }
   // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
   //   method: 'POST',
   //   headers: {
@@ -159,6 +160,7 @@ async function reviewPR () {
   const patchArray = await getPullRequest()
   let result = ''
   for (let i = 0; i < patchArray.length; i++) {
+    console.log(patchArray[i])
     await getComments(patchArray[i])
   }
   console.log(PRReviewResult)
