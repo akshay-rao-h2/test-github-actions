@@ -2,8 +2,13 @@ const core = require('@actions/core')
 const github = require('@actions/github')
 const { v4: uuidv4 } = require('uuid')
 
-const chatToken = core.getInput('AITOKEN') || core.getInput('AiToken') || core.getInput('aitoken') || core.getInput('aiToken')
-console.log({chatToken})
+const AITOKEN = core.getInput('AITOKEN')
+const AiToken = core.getInput('AiToken')
+const aitoken = core.getInput('aitoken')
+const aiToken = core.getInput('aiToken')
+
+const chatToken = AITOKEN || AiToken || aitoken || aiToken
+console.log({ chatToken , AITOKEN , AiToken , aitoken , aiToken })
 const { Configuration, OpenAIApi } = require('openai')
 
 const configuration = new Configuration({
@@ -72,7 +77,7 @@ async function fetchSSE (resource, options) {
   try {
     const { onMessage, ...fetchOptions } = options
     // console.log({ fetchOptions })
-  
+
     console.log(JSON.stringify({ data: resp }))
     // if (resp.status > 399) {
     //   console.log(resp)
@@ -100,10 +105,10 @@ async function fetchSSE (resource, options) {
 async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   const accessToken = await getAccessToken()
   const resp = await openai.createCompletion({
-    model: "text-davinci-003",
+    model: 'text-davinci-003',
     prompt: question
   })
-  console.log(resp.data.choices[0].text);
+  console.log(resp.data.choices[0].text)
   // await fetchSSE('https://chat.openai.com/backend-api/conversation', {
   //   method: 'POST',
   //   headers: {
