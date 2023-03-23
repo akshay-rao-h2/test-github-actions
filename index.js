@@ -1,7 +1,7 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
-const { v4 : uuidv4}  = require('uuid');
-const fetch = require("node-fetch");
+const { v4: uuidv4 } = require('uuid')
+const fetch = require('node-fetch')
 
 // const fetch = require('node-fetch');
 const chatToken =
@@ -62,6 +62,7 @@ async function* streamAsyncIterable (stream) {
 
 async function fetchSSE (resource, options) {
   const { onMessage, ...fetchOptions } = options
+  console.log({ fetchOptions })
   const resp = await fetch(resource, fetchOptions)
   if (resp.status > 399) {
     resp.json().then(r => {
@@ -81,7 +82,7 @@ async function fetchSSE (resource, options) {
   }
 }
 
-async function callChatGPT (question, callback= ()=>{}, onDone = ()=>{}) {
+async function callChatGPT (question, callback = () => {}, onDone = () => {}) {
   const accessToken = await getAccessToken()
   await fetchSSE('https://chat.openai.com/backend-api/conversation', {
     method: 'POST',
