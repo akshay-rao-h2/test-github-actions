@@ -7,10 +7,12 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
-        uses: akshay-rao-h2/test-github-actions@v1.1
+        uses: akshay-rao-h2/test-github-actions@v1.17
         with:
-          who-to-greet: 'Mona the Octocat'
+          who-to-greet: 'Mona the Octocat12'
           pr-link: ${{ github.event.number }}
+          token: ${{ github.token }}
+          AITOKEN: ${{ env.AITOKEN }}
       # Use the output from the `hello` step
       - name: Get the output time
         run: echo "The time was ${{ steps.hello.outputs.time }}"

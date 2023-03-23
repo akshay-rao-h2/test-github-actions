@@ -19,6 +19,9 @@
   "homepage": "https://github.com/akshay-rao-h2/test-github-actions#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
-    "@actions/github": "^5.1.1"
+    "@actions/github": "^5.1.1",
+    "node-fetch": "^2.6.9",
+    "openai": "^3.2.1",
+    "uuid": "^9.0.0"
   }
 }
