@@ -13,9 +13,6 @@ jobs:
           pr-link: ${{ github.event.number }}
           token: ${{ github.token }}
           AITOKEN: ${{ env.AITOKEN }}
-          AiToken: ${{ env.AiToken }}
-          aitoken: ${{ env.aitoken }}
-          aiToken: ${{ env.aiToken }}
       # Use the output from the `hello` step
       - name: Get the output time
         run: echo "The time was ${{ steps.hello.outputs.time }}"
