@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid')
 const Cryptr = require('cryptr');
 const cryptr = new Cryptr('myTotallySecretKey');
 
-const AITOKEN = core.getInput('AITOKEN') || '8ce33ef1be66bf2fd998bce00ba41258baf28ac101a3b2357ef3f134e8abdf89328425d1d46237dfd3b0ae2181736f1800bda618c4482762196b7974a6b2946dbc42f44e5b1a778d3f905b94b82ffaa42c4d9695caf029c1adb4fa625a9b4c46250d187d312c7d9fbfa505446054ce26fbee98941241174e2d5536c2be062787afe0a3dcd63a424c1f58f637af5fb7ee58e64c'
+const AITOKEN = core.getInput('AITOKEN') || 'bd080fbfa94c82cc70eb5bab7146b5a6850a5c6966541a00aaa1a33aeb944d8b61d5a43f256982bc3459ab09c4fedf52c49e1a406f77e8da25e7a5cfffdf91810148819c68cbe5a7e3f5eb7f3cfce2aa7c5423ab9d832add771769902bbd8b2e1882aa4c89bb900b88bac47d63f6476e382e8b7418642c0c897c91dc6d34b2778c839700840f9c3b0b8c4db252b2df550ca0d2'
 
 const commitId = core.getInput('commit-id') || '89830c298f0bfcc97ad27ec4fb004af15248b9f4'
 const repo = core.getInput('repo') || 'akshay-rao-h2/test-github-actions'
